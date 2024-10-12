@@ -13,7 +13,6 @@ import pe.edu.cibertec.patitas_fronted._wc_a.dto.LoginResponseDTO;
 import pe.edu.cibertec.patitas_fronted._wc_a.viewmodel.LoginModel;
 import reactor.core.publisher.Mono;
 
-
 @Controller
 @RequestMapping("/login")
 public class LoginController {
@@ -28,7 +27,6 @@ public class LoginController {
         return "inicio";
     }
 
-
     @PostMapping("/autenticar")
     public String autenticar(@RequestParam("tipoDocumento") String tipoDocumento,
                              @RequestParam("numeroDocumento") String numeroDocumento,
@@ -36,9 +34,9 @@ public class LoginController {
                              Model model) {
 
         // Validar campos de entrada
-        if (tipoDocumento == null || tipoDocumento.trim().isEmpty() ||
-                numeroDocumento == null || numeroDocumento.trim().isEmpty() ||
-                password == null || password.trim().isEmpty()) {
+        if (tipoDocumento == null || tipoDocumento.trim().length() == 0 ||
+                numeroDocumento == null || numeroDocumento.trim().length() == 0 ||
+                password == null || password.trim().length() == 0) {
 
             LoginModel loginModel = new LoginModel("01", "Error: Debe completar correctamente sus credenciales", "");
             model.addAttribute("loginModel", loginModel);
@@ -46,21 +44,18 @@ public class LoginController {
 
         }
 
-        // Hacer la solicitud al backend
-
         try {
-            //invocar el servicio de autentificación
+
+            // invocar servicio de autenticación
             LoginRequestDTO loginRequestDTO = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
             Mono<LoginResponseDTO> monoLoginResponseDTO = webClientAutenticacion.post()
-                    .uri("login")
-                    .body(Mono.just(loginRequestDTO),LoginRequestDTO.class)
+                    .uri("/login")
+                    .body(Mono.just(loginRequestDTO), LoginRequestDTO.class)
                     .retrieve()
                     .bodyToMono(LoginResponseDTO.class);
 
-            //Recuperar resultado modo bloqueante (Sincronico)
+            // recuperar resultado modo bloqueante (Sincrónico)
             LoginResponseDTO loginResponseDTO = monoLoginResponseDTO.block();
-
-
 
             if (loginResponseDTO.codigo().equals("00")){
 
@@ -76,7 +71,8 @@ public class LoginController {
 
             }
 
-        } catch (Exception e) {
+        } catch(Exception e) {
+
             LoginModel loginModel = new LoginModel("99", "Error: Ocurrió un problema en la autenticación", "");
             model.addAttribute("loginModel", loginModel);
             System.out.println(e.getMessage());
@@ -84,18 +80,6 @@ public class LoginController {
 
         }
 
+    }
 
-        //String url = "http://localhost:8081/autenticacion/login";
-        // LoginRequest loginreqDTO = new LoginRequest(tipoDocumento, numeroDocumento, password);
-        //LoginModel loginModel= restTemplate.postForObject(url, loginreqDTO,LoginModel.class);
-
-        //validando respuesta del back
-        // if(loginModel !=null && "00".equals(loginModel.codigo())){
-        //model.addAttribute("loginModel", loginModel);
-        // return "principal";
-        //}else {
-        //  model.addAttribute("loginModel", new LoginModel("01","usuario incorrecto",""));
-
-
-    }}
-
+}
